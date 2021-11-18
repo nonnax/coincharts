@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+# Id$ nonnax 2021-11-12 23:41:51 +0800
+require 'excon'
+require 'json'
+require 'array_table'
+require 'arraycsv'
+
+def update(coin, days=1)
+# days = 7 unless days
+  res= Excon.get "https://api.coingecko.com/api/v3/coins/#{coin}/ohlc?vs_currency=php&days=#{days}"
+  p body=JSON.parse(res.body)
+  data=ArrayCSV.new("#{coin}_#{days}.csv", 'w')
+  data<<%w[date open high low close]
+  body.each do |r|
+    r[0]=Time.at(r[0].to_i/1000)
+    data<<r  
+  end
+end
+coin_list=%w[bitcoin ethereum bitcoin-cash chainlink litecoin ripple uniswap]
+
+coin_list.each_with_index do |c, i|
+  update(c)
+  update(c, 7)
+  sleep 1
+  print [i+1,coin_list.size].join('/')+"\r"
+end
+
+puts
+
+coin_list.each do |c|
+  IO.popen("erb filename='#{c}_1.csv' ./genchart.erb  > 'views/#{c}.html'", &:read)
+  IO.popen("erb filename='#{c}_7.csv' ./genchart.erb  > 'views/#{c}_7.html'", &:read)
+end

@@ -1,0 +1,28 @@
+body{
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+p{
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+.inline_menu {
+  margin: 0;
+  padding: 5px;
+  width: 8%;
+  float: left;
+  height: 350px;
+  display: inline-block;
+}
+.inline_chart { 
+  /* float: left; */
+  display: inline-block; 
+  width: 70%;
+  height: 350px; 
+  /* zoom: 0.75; */
+}
+.inline_menu:hover{
+    zoom: 2;
+}

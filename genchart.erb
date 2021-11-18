@@ -1,0 +1,67 @@
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<% require 'apexcharts' %>
+<% include ApexCharts::Helper %>
+<%
+  
+  require 'date'
+  require 'fzf'
+  require 'csv'
+  require 'time'
+
+  @filename=filename
+
+  def filename
+    @filename
+    # Dir['*.csv'].fzf.first
+  end
+  
+  def candlestick_data
+    # @acc = rand(6570..6650)
+    # 60.times.map {|i| [Date.today - 60 + i, ohlc] }.to_h
+    # {
+      # <x value> => [<Open>, <High>, <Low>, <Close>],
+      # <x value> => [<Open>, <High>, <Low>, <Close>],
+      # ...
+    # }
+    # 
+    # or this:
+    # 
+    # [
+      # [<x value>, [<Open>, <High>, <Low>, <Close>]],
+      # [<x value>, [<Open>, <High>, <Low>, <Close>]],
+      # ...
+    # ]
+    data=CSV.read( filename,  headers:           true,
+                      converters:        :numeric,
+                      header_converters: :symbol  )
+    data.to_a[1..-1].map{|r| [Time.parse(r.first).strftime("%b-%d %H:%M"), r.values_at(1..4).map(&:to_f)]}
+  end
+
+  candlestick_options = {
+    animations: false, # Shortcut for chart: { animations: { enabled: false } }
+    # chart: {
+      # fontFamily: "Helvetica, Arial, sans-serif",
+      # toolbar: {
+        # show: false
+      # }
+    # },
+    curve: "straight", # Shortcut for stroke: { curve: "straight" }
+    markers: {
+      size: 5,
+    },
+    # tooltip: false, # Shortcut for tooltip: { enabled: false }
+
+    xtitle: @filename.gsub(/\.w+$/,''),
+    plot_options: {
+      candlestick: {
+        colors: {
+          upward: '#9acd32', #yellow green
+          downward: '#8b0000' #darkred
+        }
+      }
+    }
+  }
+%>
+
+<%= candlestick_chart(candlestick_data, {class: 'candle', height: 350, style: 'display: inline-block; width: 100%;'}.merge(candlestick_options)) %>
+
