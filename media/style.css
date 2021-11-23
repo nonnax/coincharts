@@ -1,0 +1,51 @@
+body{
+  margin: 0;
+  padding: 0;
+  background: !important white;
+}
+#content{
+  margin: 0;
+  padding-left: 0;
+  border: 1px black dashed; 
+  -moz-transform: scale(0.80); 
+  position:relative;
+  left:0;
+}
+p{
+  margin: 0;
+  padding: 0;
+}
+#chart{
+  margin: 0;
+  padding: 0;
+  -moz-transform: scale(0.75); 
+}
+
+iframe{
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 70%;
+  resize: both; 
+  overflow: auto; 
+  /* -moz-transform: scale(0.6); */
+}
+
+.inline_menu {
+  margin: 0;
+  padding: 5px;
+  width: 8%;
+  float: left;
+  height: 350px;
+  display: inline-block;
+}
+.inline_chart { 
+  /* float: left; */
+  display: inline-block; 
+  width: 70%;
+  height: 350px; 
+  /* zoom: 0.75; */
+}
+.inline_menu:hover{
+    zoom: 2;
+}
