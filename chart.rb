@@ -10,6 +10,12 @@ require 'csv'
 require 'erb'
 WATCHLIST = %w[bitcoin ethereum bitcoin-cash chainlink litecoin ripple uniswap].freeze
 # Cuba.plugin Cuba::Render
+
+# configure :development do
+  # Cuba.reset!
+  # Cuba.use Rack::Reloader
+# end
+
 Scooby.class_eval do
   def menu
     WATCHLIST.each do |coin|
@@ -19,6 +25,10 @@ Scooby.class_eval do
   end
 end
 Cuba.class_eval do
+  def not_found
+    res.status=404
+    res.write 'hala wala yan!'
+  end
   def _layout(&block)
     Scooby.dooby do
       html do
@@ -48,8 +58,9 @@ Cuba.class_eval do
     end
   end
 
-  def candlestick_data
-    filename = 'chainlink_1.csv'
+  def candlestick_data(coin, days)
+    filename = "#{coin}_#{days}.csv"
+    return [] unless File.exists?(filename)
     data = CSV.read(filename,
                       headers: true,
                       converters: :numeric,
@@ -90,26 +101,20 @@ include ApexCharts::Helper
 
 Cuba.define do
   on get do
-    # on 'test' do
-      # # candlestick_data=[]
-      # # candlestick_data<<[:xval1, [1234, 1234, 1200, 1235]]
-      # # candlestick_data<<[:xval2, [1567, 1667, 1567, 1567]]
-# 
-      # res.write ERB.new(%{
-              # <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-              # <%= candlestick_chart(candlestick_data, {class: 'candle', height: 350, style: 'display: inline-block; width: 100%;'}.merge(candlestick_options)) %>
-          # }).result(binding)
-    # end
-
-    on 'x' do
-      v = candlestick_chart(candlestick_data, {class: 'candle', height: 350, style: 'display: inline-block; width: 100%;'})#.merge(candlestick_options))
+    on 'chart/:coin/:days' do |coin, days|
+      plotdata=candlestick_data(coin, days)
+      res.redirect '/404' if plotdata.empty?
+      v = candlestick_chart(
+              plotdata, 
+              {class: 'candle', height: 350, style: 'display: inline-block; width: 100%;'}.merge(candlestick_options)
+            )
       v.prepend %{<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>}
       render(use_layout: true) { v }
     end
 
-    # on 'litecoin' do
-    # render_coin('litecoin')
-    # end
+    on 'hoy' do
+      res.write 'hi x!'
+    end
     # on 'chainlink' do
     # render_coin('chainlink')
     # end
@@ -119,8 +124,9 @@ Cuba.define do
     on 'crypto/:coin' do |coin|
       render(use_layout: true) do
         div(id: 'chart') do
-          iframe(src: "/coin/#{coin}/1") { '' }
-          iframe(src: "/coin/#{coin}/7") { '' }
+          iframe(src: "/chart/#{coin}/1") { '' }
+          iframe(src: "/chart/#{coin}/7") { '' }
+          # iframe(src: "/coin/#{coin}/7") { '' }
         end
       end
     end
@@ -133,5 +139,10 @@ Cuba.define do
     on root do
       res.redirect 'crypto/uniswap'
     end
+    
+    on default do
+      res.write '<h1>not found</h1>'
+    end
+    
   end
 end

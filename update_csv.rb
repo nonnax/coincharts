@@ -8,7 +8,7 @@ require 'rubytools/arraycsv'
 def update(coin, days=1)
 # days = 7 unless days
   res= Excon.get "https://api.coingecko.com/api/v3/coins/#{coin}/ohlc?vs_currency=php&days=#{days}"
-  p body=JSON.parse(res.body)
+  body=JSON.parse(res.body)
   data=ArrayCSV.new("#{coin}_#{days}.csv", 'w')
   data<<%w[date open high low close]
   body.each do |r|
